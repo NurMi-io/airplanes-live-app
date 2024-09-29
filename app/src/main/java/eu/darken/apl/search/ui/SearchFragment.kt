@@ -19,6 +19,7 @@ import eu.darken.apl.common.uix.Fragment3
 import eu.darken.apl.common.viewbinding.viewBinding
 import eu.darken.apl.databinding.SearchFragmentBinding
 import eu.darken.apl.main.ui.MainActivity
+import eu.darken.apl.search.core.SearchRepo
 
 
 @AndroidEntryPoint
@@ -82,9 +83,15 @@ class SearchFragment : Fragment3(R.layout.search_fragment) {
                 getString(R.string.search_page_label)
             }
             searchInput.apply {
-                if (text.toString() != state.query?.term) {
-                    setText(state.query?.term ?: "")
+                when (state.query) {
+                    is SearchRepo.Query.All -> if (text.toString() != state.query?.term) {
+                        setText(state.query?.term)
+                    }
+
+                    is SearchRepo.Query.Position -> setText("")
+                    null -> setText("")
                 }
+
             }
         }
 

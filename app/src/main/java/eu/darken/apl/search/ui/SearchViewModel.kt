@@ -2,7 +2,6 @@ package eu.darken.apl.search.ui
 
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.darken.apl.common.BuildConfigWrap
 import eu.darken.apl.common.WebpageTool
 import eu.darken.apl.common.coroutine.DispatcherProvider
 import eu.darken.apl.common.datastore.valueBlocking
@@ -18,6 +17,7 @@ import eu.darken.apl.search.ui.items.LocationPromptVH
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -33,14 +33,22 @@ class SearchViewModel @Inject constructor(
     private val generalSettings: GeneralSettings,
 ) : ViewModel3(dispatcherProvider) {
 
-    private val currentQuery = MutableStateFlow(
-        if (BuildConfigWrap.DEBUG) SearchRepo.Query("C17") else null
-    )
+    private val currentQuery = MutableStateFlow<SearchRepo.Query?>(null)
     private val currentSearch: Flow<SearchRepo.Result?> = currentQuery
         .map { query -> query?.let { searchRepo.search(it) } }
         .flatMapLatest { it ?: flowOf(null) }
 
     val events = SingleLiveEvent<SearchEvents>()
+
+    init {
+        launch {
+            if (currentQuery.value != null) return@launch
+            val locationState = locationManager2.state.first()
+            if (locationState is LocationManager2.State.Available) {
+                currentQuery.value = SearchRepo.Query.Position(locationState.location)
+            }
+        }
+    }
 
     val state = combine(
         currentQuery,
@@ -96,7 +104,7 @@ class SearchViewModel @Inject constructor(
         log(TAG) { "search($term)" }
         currentQuery.value = term
             ?.takeIf { it.isNotBlank() }
-            ?.let { SearchRepo.Query(it) }
+            ?.let { SearchRepo.Query.All(it) }
     }
 
     data class State(

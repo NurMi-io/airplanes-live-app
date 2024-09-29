@@ -1,5 +1,6 @@
 package eu.darken.apl.main.core.api
 
+import android.location.Location
 import dagger.Reusable
 import eu.darken.apl.common.coroutine.DispatcherProvider
 import eu.darken.apl.common.debug.logging.log
@@ -98,6 +99,20 @@ class AirplanesLiveEndpoint @Inject constructor(
     ): Collection<AirplanesLiveApi.Aircraft> = withContext(dispatcherProvider.IO) {
         log(TAG) { "getByAirframe(squawks=$airframes)" }
         if (airframes.isEmpty()) return@withContext emptySet()
+        airframes
+            .chunkToCommaArgs()
+            .map { api.getAircraftByAirframe(it).throwForErrors() }
+            .toList()
+            .let { responses ->
+                responses.flatMap { it.ac }
+            }
+    }
+
+    suspend fun getByLocation(
+        location: Location,
+        radius: Int,
+    ): Collection<AirplanesLiveApi.Aircraft> = withContext(dispatcherProvider.IO) {
+        log(TAG) { "getByLocation($location,$radius)" }
         airframes
             .chunkToCommaArgs()
             .map { api.getAircraftByAirframe(it).throwForErrors() }
