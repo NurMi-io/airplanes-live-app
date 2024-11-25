@@ -3,8 +3,6 @@
 # airplanes.live App
 
 [![API](https://img.shields.io/badge/API-26%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=26)
-[![Code tests & eval](https://img.shields.io/github/actions/workflow/status/d4rken/airplanes-live-app/code-checks.yml?logo=githubactions&label=Code%20tests
-)](https://github.com/d4rken/airplanes-live-app/actions)
 [![Github Downloads](https://img.shields.io/github/downloads/d4rken/airplanes-live-app/total.svg?label=GitHub%20Downloads&logo=github)](https://github.com/d4rken/airplanes-live-app/releases/latest)
 
 An Android app for https://airplanes.live
